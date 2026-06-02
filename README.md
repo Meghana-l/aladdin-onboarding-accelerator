@@ -1,38 +1,100 @@
 # Aladdin Client Onboarding Accelerator
 
-**AI-powered reference data validation tool for Aladdin client onboarding.**  
-Built as a project submission for the BlackRock Data Implementation Specialist – Associate role.
+## Live Demo
+https://meghana-l.github.io/aladdin-onboarding-accelerator/
+
+AI-powered reference data validation tool simulating an Aladdin client onboarding pipeline. A Python reconciliation engine checks 140 securities across fixed income, equities, derivatives and private markets against Aladdin conventions. Claude API classifies each issue with root cause and recommended fix.
 
 ---
 
-## What makes this real
+## Project Structure
 
-### Real data sources
-- **S&P 500 constituents** (GitHub): real company names, real GICS sectors — used for the equity portfolio
-- **EURIBOR 3M** (GitHub): live rate used to validate EUR swap fixed rates
-- **US 10Y Treasury yield** (GitHub): used to check derivative rate reasonableness
-- **VIX** (GitHub): market stress context embedded in every risk-related issue flag
+| File | What it does |
+|---|---|
+| `generate_data.py` | Fetches live market data (EURIBOR, US 10Y, VIX) and builds the client security master |
+| `reconcile.py` | Runs validation checks against Aladdin conventions and outputs all issues |
+| `ai_classify.py` | Sends each issue to Claude API for root cause analysis and fix recommendation |
+| `index.html` | Live analyst dashboard — open this in your browser to see the full output |
 
-### Real reconciliation logic
-The engine runs 25+ checks against actual Aladdin data conventions — the same rules the Data Implementation team applies manually. Issues it detects include:
+---
 
-| Issue Type | Asset Class | How it's detected |
+## How to Run
+
+### Step 1 — Install dependencies
+```bash
+pip install pandas numpy
+```
+
+### Step 2 — Add your Anthropic API key
+
+Open `ai_classify.py` in any text editor and find this line:
+
+```python
+api_key = os.environ.get("ANTHROPIC_API_KEY","")
+```
+
+Replace it with:
+
+```python
+api_key = os.environ.get("ANTHROPIC_API_KEY","your_key_here")
+```
+
+Get your API key at https://console.anthropic.com
+
+Without a key the script runs in demo mode automatically — no error.
+
+### Step 3 — Run the scripts in order
+
+```bash
+# Fetches live EURIBOR, US 10Y Treasury, VIX and builds the security master
+python generate_data.py
+
+# Validates all 140 securities against Aladdin conventions
+python reconcile.py
+
+# Classifies each issue with Claude AI (or demo mode if no key set)
+python ai_classify.py
+```
+
+### Step 4 — Open the dashboard
+
+Double-click `index.html` or run:
+
+```bash
+open index.html
+```
+
+The dashboard works as a standalone file with no server needed — all pipeline output is embedded.
+
+---
+
+## What the Reconciliation Engine Checks
+
+| Check | Asset Class | Aladdin Convention |
 |---|---|---|
-| Duration vs YTM discrepancy | Fixed Income | Client value vs computed value > 0.4 year tolerance |
-| Float index non-ISDA format | Derivatives | `USD-SOFR` vs required `USD-SOFR-CME` |
-| Benchmark ID wrong format | FI + Equity | Client uses `ALSI`, Aladdin requires `FTSE-JSE-ALSI40` |
-| NAV staleness >90 days | Private Markets | Aladdin's published freshness threshold |
-| Missing derivative notional | Derivatives | Go-live blocker — Aladdin cannot price |
-| GICS sector mismatch | Equity | Client classification vs MSCI standard |
-| CPI flag wrong on linkers | Fixed Income | Cross-check name vs field value |
-| Currency unit error (GBP/GBp) | Equity | 100x price error on dual-listed names |
-
-### Real AI classification
-Claude API classifies each issue with: root cause, recommended fix action, go-live risk flag, confidence score. Falls back to demo mode without an API key.
+| Duration vs YTM | Fixed Income | Delta > 0.4 years flagged as critical |
+| Convexity present | Fixed Income | Required for Aladdin risk analytics |
+| Benchmark ID format | FI + Equity | Must be `FTSE-JSE-ALBI` not `ALBI` |
+| Float index ISDA name | Derivatives | Must be `USD-SOFR-CME` not `USD-SOFR` |
+| Notional present | Derivatives | Go-live blocker — Aladdin cannot price without it |
+| NAV freshness | Private Markets | Aladdin requires NAV within 90 days |
+| GICS sector vs MSCI | Equity | Client classification checked against MSCI standard |
+| CPI flag on linkers | Fixed Income | Incorrect flag causes 4x duration calculation error |
 
 ---
 
-## Results on STANLIB demo run
+## Real Data Sources
+
+| Data | Source | Used for |
+|---|---|---|
+| S&P 500 constituents | GitHub public dataset | Real company names and GICS sectors |
+| EURIBOR 3M | GitHub public dataset | Validating EUR swap fixed rates |
+| US 10Y Treasury yield | GitHub public dataset | Derivative rate reasonableness checks |
+| VIX | GitHub public dataset | Market stress context in issue flags |
+
+---
+
+## Results on STANLIB Demo Run
 
 | Asset Class | Securities | Readiness | Issues |
 |---|---|---|---|
@@ -40,29 +102,10 @@ Claude API classifies each issue with: root cause, recommended fix action, go-li
 | Equity | 40 | 75% ✅ | 22 |
 | Derivatives | 25 | 44% 🔴 | 32 |
 | Private Markets | 15 | 20% 🔴 | 23 |
-| **Total** | **140** | **47% ❌** | **161** |
+| **Overall** | **140** | **47% ❌** | **161** |
 
 33 critical go-live blockers. Not UAT-ready.
 
 ---
 
-## How to run
-
-```bash
-pip install pandas numpy
-
-# 1. Fetch real market data + build security master
-python generate_data.py
-
-# 2. Run validation engine
-python reconcile.py
-
-# 3. AI classification (set key for real calls, or runs demo mode)
-export ANTHROPIC_API_KEY=your_key
-python ai_classify.py
-
-# 4. Open dashboard (works standalone — data is embedded)
-open aladdin_onboarding_accelerator_FINAL.html
-```
-
-
+*Meghana Lakshminarayana Swamy — MS Business Analytics, University of New Haven*
