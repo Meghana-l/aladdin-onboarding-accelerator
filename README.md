@@ -65,19 +65,4 @@ python ai_classify.py
 open aladdin_onboarding_accelerator_FINAL.html
 ```
 
----
 
-## Project → JD mapping
-
-| JD requirement | This project |
-|---|---|
-| Python for large-scale data reconciliation | 3 scripts, 140 securities, 25+ check types |
-| AI-powered anomaly detection | Claude API classifies every issue |
-| Human-in-the-loop review | Analyst marks each AI recommendation as resolved |
-| Fixed income concepts (duration, convexity) | Duration tolerance check vs YTM; convexity validation |
-| Bloomberg/LSEG/Markit data providers | Field naming follows Bloomberg conventions throughout |
-| Private markets | NAV staleness, IRR, cashflow schedule checks |
-| Aladdin platform conventions | All checks reference Aladdin benchmark IDs, ISDA float index names, day-count conventions |
-| Milestone tracking | Dashboard shows real implementation phases |
-
-*— Meghana Lakshminarayana Swamy | MS Business Analytics, University of New Haven*
